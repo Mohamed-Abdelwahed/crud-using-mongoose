@@ -6,12 +6,13 @@ router.post("/patients", (req, res) => {
   console.log(req.body);
 
   const patient = new Patient(req.body);
-  patient.save()
+  patient
+    .save()
     .then((patient) => {
       res.status(200).send(patient);
     })
     .catch((e) => res.status(400).send(e));
- });
+});
 //////////////////////////////
 router.get("/patients", (req, res) => {
   Patient.find({})
@@ -40,19 +41,32 @@ router.get("/patients/:id", (req, res) => {
 });
 ///////////////////////////////
 //=====================patch to edite
-router.patch("/patients/:id", async (req, res) => {
+router.patch('/patients/:id', async (req, res) => {
   try {
+    //=================
+    const updates = Object.keys(req.body);
+    console.log(updates);
+    //=================
     const _id = req.params.id;
-    const patient = await Patient.findByIdAndUpdate(_id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+
+    //========================================
+    // const patient = await Patient.findByIdAndUpdate(_id,req.body, {
+    //   new: true,
+    //   runValidators: true,
+    // });
+    //======================
+    const patient = await Patient.findById(_id);
+
     if (!patient) {
       return res.status(404).send("NO Patient founded");
     }
-    res.status(200).send(Patient);
+    updates.forEach((ele)=>(patient[ele] = req.body[ele]))
+
+    await patient.save()
+    res.status(200).send(patient);
   } catch (e) {
     res.status(400).send(e);
+    console.log(e);
   }
 });
 ///////////////////////////////////
@@ -69,5 +83,28 @@ router.delete("/patients/:id", async (req, res) => {
     res.status(500).send(e);
   }
 });
+
+
+/**
+ *  ===============x==================================
+ *  LOGIN LOGIC
+ * ===================================================
+ */
+
+router.post('/login' , async (req,res)=>{
+  try {
+    const user = await Patient.findByCredentials(req.body.email , req.body.password);
+    res.status(200).send(user);
+  } catch (error) {
+    console.log(error);
+    res.status(400).send(error.message);
+  }
+})
+
+/**
+ * ---------------------------------
+ * End Login Logic
+ * ----------------------------------
+ */
 
 module.exports = router;
