@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcryptjs = require("bcryptjs");
+const jwt = require('jsonwebtoken')
 
 const patientSchema = new mongoose.Schema({
   patientname: {
@@ -46,6 +47,12 @@ const patientSchema = new mongoose.Schema({
   city: {
     type: String,
   },
+  tokens : [
+    {
+    type : String , 
+    required : true
+  }
+]
 });
 //==================================
 patientSchema.pre("save", async function () {
@@ -78,5 +85,36 @@ patientSchema.statics.findByCredentials = async (em , pass)=>{
 }
 
 //==================================
+
+/**=============== JWT LOGIC=================== */
+
+patientSchema.methods.generateToken = async function(){
+    const patient = this ;
+    const token = jwt.sign({_id : patient._id.toString()} , "mohamed22");
+    patient.tokens = patient.tokens.concat(token)
+    await patient.save()
+    return token;
+}
+
+//==================================
+/**
+ * 
+ * Hide data from front
+ */
+
+patientSchema.methods.toJSON = function(){
+  const patient = this
+  const patientObject = patient.toObject()
+
+  delete patientObject.password
+  delete patientObject.tokens
+
+
+  return patientObject
+}
+
+
+
+//==============================
 const Patient = mongoose.model("patient", patientSchema);
 module.exports = Patient;

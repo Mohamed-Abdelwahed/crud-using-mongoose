@@ -1,3 +1,15 @@
+
+/**======================================================= */
+// const jwt = require('jsonwebtoken')
+// const myToken = ()=>{
+//   const token  = jwt.sign({_id : "123456789"} , "Mohamed22" );
+//   console.log(token);
+
+//   const tokenVerify = jwt.verify(token , "Mohamed22");
+//   console.log(tokenVerify);
+// }
+// myToken();
+/**======================================================= */
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;

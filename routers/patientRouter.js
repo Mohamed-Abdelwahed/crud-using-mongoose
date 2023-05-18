@@ -2,17 +2,17 @@ const express = require("express");
 const Patient = require("../models/patientModel");
 const router = express.Router();
 
-router.post("/patients", (req, res) => {
-  console.log(req.body);
+// router.post("/patients", (req, res) => {
+//   console.log(req.body);
 
-  const patient = new Patient(req.body);
-  patient
-    .save()
-    .then((patient) => {
-      res.status(200).send(patient);
-    })
-    .catch((e) => res.status(400).send(e));
-});
+//   const patient = new Patient(req.body);
+//   patient
+//     .save()
+//     .then((patient) => {
+//       res.status(200).send(patient);
+//     })
+//     .catch((e) => res.status(400).send(e));
+// });
 //////////////////////////////
 router.get("/patients", (req, res) => {
   Patient.find({})
@@ -93,8 +93,10 @@ router.delete("/patients/:id", async (req, res) => {
 
 router.post('/login' , async (req,res)=>{
   try {
-    const user = await Patient.findByCredentials(req.body.email , req.body.password);
-    res.status(200).send(user);
+    const patient = await Patient.findByCredentials(req.body.email , req.body.password);
+    const token = await patient.generateToken();
+
+    res.status(200).send({patient , token});
   } catch (error) {
     console.log(error);
     res.status(400).send(error.message);
@@ -105,6 +107,99 @@ router.post('/login' , async (req,res)=>{
  * ---------------------------------
  * End Login Logic
  * ----------------------------------
+ */
+
+/**
+ * 
+ * 
+ *-----------------------------------------
+ * Token Logic
+ * ----------------------------------------
+ */
+
+
+    router.post("/patients" , async (req,res)=>{
+      try{
+        const patient = new Patient(req.body)
+        const token = await patient.generateToken()
+        await patient.save()
+
+      res.status(200).send({patient , token})
+      }catch(e){
+        res.status(400).send(e)
+      }
+    })
+
+
+ /**
+ * 
+ * 
+ *-----------------------------------------
+ * End Token Logic
+ * ----------------------------------------
+ */
+
+ /**
+ * 
+ *-----------------------------------------
+ * Start Profile
+ * ----------------------------------------
+ */
+router.get('/profile' , auth , async(req,res)=>{
+  res.status(200).send(req.body);
+})
+ /**
+ * 
+ *-----------------------------------------
+ * End Profile
+ * ----------------------------------------
+ */
+
+ /**
+ * 
+ *-----------------------------------------
+ * Start Logout
+ * ----------------------------------------
+ */
+router.delete('/logout' , auth , async(req,res)=>{
+  try{
+    console.log(req.body);
+    req.patient.tokens = req.user.tokens.filter((el)=>{
+      return el !== req.token
+    })
+    await req.patient.save();
+    res.send();
+  }catch(e){
+    res.status(500).send(e);
+  }
+})
+ /**
+ * 
+ *-----------------------------------------
+ * End Logout
+ * ----------------------------------------
+ */
+
+ /**
+ * 
+ *-----------------------------------------
+ * Start Logout ALL
+ * ----------------------------------------
+ */
+router.delete('/logoutAll' , auth , async(req,res)=>{
+  try{
+   req.patient.tokens = [];
+   await req.user.save();
+   res.send();
+    }catch(e){
+    res.status(500).send(e);
+  }
+})
+ /**
+ * 
+ *-----------------------------------------
+ * End Logout ALL
+ * ----------------------------------------
  */
 
 module.exports = router;
