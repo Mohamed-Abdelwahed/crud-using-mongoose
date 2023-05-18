@@ -25,6 +25,10 @@ app.use(patientRouter);
 
 /**================================================== */
 
+const taskRouter = require("./routers/task");
+app.use(taskRouter);
+/**================================================== */
+
 
 const bcryptjs = require('bcryptjs')
 const passwordFunction = async ()=>{

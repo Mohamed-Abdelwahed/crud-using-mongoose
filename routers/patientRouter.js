@@ -1,5 +1,6 @@
 const express = require("express");
 const Patient = require("../models/patientModel");
+const auth = require("../middleware/auth");
 const router = express.Router();
 
 // router.post("/patients", (req, res) => {
@@ -13,8 +14,8 @@ const router = express.Router();
 //     })
 //     .catch((e) => res.status(400).send(e));
 // });
-//////////////////////////////
-router.get("/patients", (req, res) => {
+/*////////////============================//////////===============================================*/
+router.get("/patients", auth,(req, res) => {
   Patient.find({})
     .then((patients) => {
       res.status(200).send(patients);
@@ -25,7 +26,7 @@ router.get("/patients", (req, res) => {
 });
 
 //=========================
-router.get("/patients/:id", (req, res) => {
+router.get("/patients/:id", auth ,  (req, res) => {
   console.log(req.params.id);
   const _id = req.params.id;
   Patient.findById(_id)
@@ -41,7 +42,7 @@ router.get("/patients/:id", (req, res) => {
 });
 ///////////////////////////////
 //=====================patch to edite
-router.patch('/patients/:id', async (req, res) => {
+router.patch('/patients/:id',auth ,  async (req, res) => {
   try {
     //=================
     const updates = Object.keys(req.body);
@@ -71,7 +72,7 @@ router.patch('/patients/:id', async (req, res) => {
 });
 ///////////////////////////////////
 //=============Delete
-router.delete("/patients/:id", async (req, res) => {
+router.delete("/patients/:id",auth ,  async (req, res) => {
   try {
     const _id = req.params.id;
     const patient = await Patient.findByIdAndDelete(_id);
@@ -145,9 +146,11 @@ router.post('/login' , async (req,res)=>{
  * Start Profile
  * ----------------------------------------
  */
-router.get('/profile' , auth , async(req,res)=>{
+router.get('/profile'  ,auth , async(req,res)=>{
+  console.log('ok Profile');
   res.status(200).send(req.body);
 })
+
  /**
  * 
  *-----------------------------------------
